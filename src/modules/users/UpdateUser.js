@@ -4,11 +4,13 @@ import { useParams } from "react-router-dom";
 import { UserForm } from "./UserForm";
 import { UsersRepository } from "./UsersRepository";
 import { Navigate } from "react-router-dom";
+import { UpdateUserValidator } from "./UserValidator";
 
 export const UpdateUser = ({}) => {
   const { id } = useParams();
   const [successMessage, setSuccessMessage] = useState();
-  const [formError, setFormError] = useState();
+  const [globalFormError, setGlobalFormError] = useState();
+  const [formFieldErrors, setFormFieldErrors] = useState();
   const [redirectTo, setRedirectTo] = useState();
   const [user, setUser] = useState({});
 
@@ -28,7 +30,24 @@ export const UpdateUser = ({}) => {
   };
 
   const handleSubmit = () => {
-    setFormError(null);
+    let valid = UpdateUserValidator.isValidSync(user);
+    if (!valid) {
+      console.log("Not valid");
+      let validationErrors = {};
+      console.log(user);
+      UpdateUserValidator.validate(user, { abortEarly: false }).catch((err) => {
+        console.log(err.inner);
+        err.inner.forEach((validationError) => {
+          validationErrors[validationError.path] = {};
+          validationErrors[validationError.path] = validationError.message;
+        });
+        console.log(validationErrors);
+        setFormFieldErrors(validationErrors);
+      });
+      return;
+    }
+
+    setGlobalFormError(null);
     setSuccessMessage();
     UsersRepository.updateUser(user)
       .then((res) => {
@@ -37,7 +56,7 @@ export const UpdateUser = ({}) => {
       })
       .catch((err) => {
         console.log(err);
-        setFormError(err);
+        setGlobalFormError(err);
       });
   };
 
@@ -51,29 +70,34 @@ export const UpdateUser = ({}) => {
     <>
       {redirectTo && <Navigate to={redirectTo} push />}
       <Grid container spacing={2}>
-        <h1>Update existing user</h1>
-        <Grid item xs={12} style={{ marginBottom: "20px" }}>
-          {successMessage && (
-            <Grid item xs={12}>
-              <Alert severity="success">{successMessage}</Alert>
-            </Grid>
-          )}
+        <Grid item xs={12}>
+          <h1>Update existing user</h1>
         </Grid>
-        <UserForm
-          formError={formError}
-          user={user}
-          handleSubmit={handleSubmit}
-          handleChangeUserData={handleChangeUserData}
-        />
-        <Grid item xs={10}></Grid>
-        <Grid item xs={2}>
+
+        {successMessage && (
+          <Grid item xs={12}>
+            <Alert severity="success">{successMessage}</Alert>
+          </Grid>
+        )}
+
+        <Grid item xs={12}>
+          <UserForm
+            formError={globalFormError}
+            formFieldErrors={formFieldErrors}
+            user={user}
+            handleSubmit={handleSubmit}
+            handleChangeUserData={handleChangeUserData}
+          />
+        </Grid>
+        <Grid item xs={0} md={11}></Grid>
+        <Grid item xs={12} md={1}>
           <Button
             onClick={() => {
               handleSubmit();
               //   setRedirectTo("/users");
             }}
             fullWidth
-            size="large"
+            size="small "
             variant="contained"
           >
             Edit

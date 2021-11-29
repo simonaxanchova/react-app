@@ -6,6 +6,7 @@ import {
   Grid,
   Pagination,
   CircularProgress,
+  Hidden,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { UsersRepository } from "./UsersRepository";

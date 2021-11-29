@@ -3,10 +3,12 @@ import { Alert, Button } from "@mui/material";
 import { UsersRepository } from "./UsersRepository";
 import { UserForm } from "./UserForm";
 import { Grid } from "@mui/material";
+import { CreateUserValidator } from "./UserValidator";
 
 export const CreateUser = ({}) => {
   const [successMessage, setSuccessMessage] = useState();
-  const [formError, setFormError] = useState();
+  const [globalFormError, setGlobalFormError] = useState();
+  const [formFieldErrors, setFormFieldErrors] = useState();
   const [user, setUser] = useState({
     firstName: "",
     lastName: "",
@@ -15,7 +17,24 @@ export const CreateUser = ({}) => {
   });
 
   const handleSubmit = () => {
-    setFormError(null);
+    let valid = CreateUserValidator.isValidSync(user);
+    if (!valid) {
+      console.log("Not valid");
+      let validationErrors = {};
+      console.log(user);
+      CreateUserValidator.validate(user, { abortEarly: false }).catch((err) => {
+        console.log(err.inner);
+        err.inner.forEach((validationError) => {
+          validationErrors[validationError.path] = {};
+          validationErrors[validationError.path] = validationError.message;
+        });
+        console.log(validationErrors);
+        setFormFieldErrors(validationErrors);
+      });
+      return;
+    }
+
+    setGlobalFormError(null);
     setSuccessMessage();
     UsersRepository.create(user)
       .then((res) => {
@@ -24,7 +43,7 @@ export const CreateUser = ({}) => {
       })
       .catch((err) => {
         console.log(err);
-        setFormError(err);
+        setGlobalFormError(err);
       });
   };
 
@@ -37,29 +56,32 @@ export const CreateUser = ({}) => {
   return (
     <>
       <Grid container spacing={2}>
-        <h1>Create new user</h1>
-        <Grid item xs={12} style={{ marginBottom: "20px" }}>
-          {successMessage && (
-            <Grid item xs={12}>
-              <Alert severity="success">{successMessage}</Alert>
-            </Grid>
-          )}
+        <Grid item xs={12}>
+          <h1>Create new user</h1>
         </Grid>
+        {successMessage && (
+          <Grid item xs={12}>
+            <Alert severity="success">{successMessage}</Alert>
+          </Grid>
+        )}
 
-        <UserForm
-          formError={formError}
-          user={user}
-          handleSubmit={handleSubmit}
-          handleChangeUserData={handleChangeUserData}
-        ></UserForm>
-        <Grid item xs={10}></Grid>
-        <Grid item xs={2}>
+        <Grid item xs={12}>
+          <UserForm
+            formError={globalFormError}
+            formFieldErrors={formFieldErrors}
+            user={user}
+            handleSubmit={handleSubmit}
+            handleChangeUserData={handleChangeUserData}
+          ></UserForm>
+        </Grid>
+        <Grid item xs={0} md={11}></Grid>
+        <Grid item xs={12} md={1}>
           <Button
             onClick={() => {
               handleSubmit();
             }}
             fullWidth
-            size="large"
+            size="small"
             variant="contained"
           >
             Create

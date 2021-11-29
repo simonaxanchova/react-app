@@ -2,6 +2,7 @@ import {
   Alert,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   FormLabel,
   InputLabel,
   MenuItem,
@@ -15,6 +16,7 @@ import { Grid } from "@mui/material";
 
 export const UserForm = ({
   user,
+  formFieldErrors,
   handleSubmit,
   handleChangeUserData,
   formError,
@@ -28,30 +30,27 @@ export const UserForm = ({
           </Grid>
         )}
 
-        <Grid item xs={1}>
-          <div>
-            <FormControl size="small" fullWidth>
-              <InputLabel id="demo-simple-select-label">Title</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={user?.title}
-                label="Title"
-                onChange={(e) => handleChangeUserData(e, "title")}
-                value={user?.title ? user?.title : null}
-              >
-                <MenuItem value={"mr"}>Mr</MenuItem>
-                <MenuItem value={"ms"}>Ms</MenuItem>
-                <MenuItem value={"mrs"}>Mrs</MenuItem>
-                <MenuItem value={"miss"}>Miss</MenuItem>
-                <MenuItem value={"dr"}>Dr</MenuItem>
-              </Select>
-            </FormControl>
-          </div>
+        <Grid item xs={6} md={1}>
+          <FormControl size="small" fullWidth>
+            <InputLabel id="demo-simple-select-label">Title</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={user?.title}
+              label="Title"
+              onChange={(e) => handleChangeUserData(e, "title")}
+              value={user?.title ? user?.title : ""}
+            >
+              <MenuItem value={"mr"}>Mr</MenuItem>
+              <MenuItem value={"ms"}>Ms</MenuItem>
+              <MenuItem value={"mrs"}>Mrs</MenuItem>
+              <MenuItem value={"miss"}>Miss</MenuItem>
+              <MenuItem value={"dr"}>Dr</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
-        <Grid item xs={11}></Grid>
-
-        <Grid item xs={6}>
+        <Grid item xs={6} md={11}></Grid>
+        <Grid item xs={12} md={6}>
           <TextField
             label="First name"
             size="small"
@@ -59,12 +58,12 @@ export const UserForm = ({
             fullWidth
             value={user?.firstName ? user?.firstName : ""}
             onChange={(e) => handleChangeUserData(e, "firstName")}
-            error={formError?.response?.data?.data?.firstName}
-            helperText={formError?.response?.data?.data?.firstName}
+            error={formFieldErrors?.firstName}
+            helperText={formFieldErrors?.firstName}
           ></TextField>
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <TextField
             label="Last name"
             size="small"
@@ -72,8 +71,8 @@ export const UserForm = ({
             fullWidth
             value={user?.lastName ? user?.lastName : ""}
             onChange={(e) => handleChangeUserData(e, "lastName")}
-            error={formError?.response?.data?.data?.lastName}
-            helperText={formError?.response?.data?.data?.lastName}
+            error={formFieldErrors?.lastName}
+            helperText={formFieldErrors?.lastName}
           ></TextField>
         </Grid>
 
@@ -85,8 +84,8 @@ export const UserForm = ({
             fullWidth
             value={user?.email ? user?.email : ""}
             onChange={(e) => handleChangeUserData(e, "email")}
-            error={formError?.response?.data?.data?.email}
-            helperText={formError?.response?.data?.data?.email}
+            error={formFieldErrors?.email}
+            helperText={formFieldErrors?.email}
           ></TextField>
         </Grid>
 
@@ -98,20 +97,26 @@ export const UserForm = ({
             variant="outlined"
             fullWidth
             onChange={(e) => handleChangeUserData(e, "dateOfBirth")}
-            error={formError?.response?.data?.data?.dateOfBirth}
-            helperText={formError?.response?.data?.data?.dateOfBirth}
-            value={user?.dateOfBirth ? user?.dateOfBirth : ""}
+            error={formFieldErrors?.dateOfBirth}
+            helperText={formFieldErrors?.dateOfBirth}
+            //value={user?.dateOfBirth ? user?.dateOfBirth : ""}
+            value={user?.dateOfBirth}
           ></TextField>
         </Grid>
 
-        <Grid item xs={4}>
+        <Grid item xs={6} md={1}>
           <TextField
             label="Phone number"
             size="small"
             variant="outlined"
             fullWidth
             value={user?.phone ? user?.phone : ""}
-            onChange={(e) => handleChangeUserData(e, "phone")}
+            onChange={(e) => {
+              if (!e.target.value.includes("-"))
+                handleChangeUserData(e, "phone");
+            }}
+            error={formFieldErrors?.phone}
+            helperText={formFieldErrors?.phone}
           ></TextField>
         </Grid>
 
@@ -123,6 +128,7 @@ export const UserForm = ({
               aria-label="gender"
               name="row-radio-buttons-group"
               onChange={(e) => handleChangeUserData(e, "gender")}
+              error={formFieldErrors?.gender}
               value={user?.gender ? user?.gender : null}
             >
               <FormControlLabel
@@ -137,6 +143,7 @@ export const UserForm = ({
                 label="Other"
               />
             </RadioGroup>
+            <FormHelperText>{formFieldErrors?.gender}</FormHelperText>
           </FormControl>
         </Grid>
       </Grid>
