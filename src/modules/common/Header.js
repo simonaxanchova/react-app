@@ -41,7 +41,7 @@ export default function Header({}) {
       onClick={toggleDrawer(anchor, false)}
       onKeyDown={toggleDrawer(anchor, false)}
     >
-      <List style={{ backgroundColor: "#F5F5F5", fontColor: "red" }}>
+      <List style={{ backgroundColor: "#F5F5F5", fontColor: "#3498db" }}>
         {["Home", "Users", "Create New User"].map((text, index) => (
           <Link
             to={
@@ -53,10 +53,13 @@ export default function Header({}) {
                 ? "/users/create"
                 : ""
             }
-            style={{ textDecoration: "none", color: "#1F393C" }}
+            style={{
+              textDecoration: "none",
+              color: "#0652DD",
+            }}
           >
             <ListItem button key={text}>
-              <ListItemIcon>
+              <ListItemIcon style={{ color: "#0652DD" }}>
                 {index === 0 ? (
                   <HomeIcon />
                 ) : index === 1 ? (
@@ -81,7 +84,7 @@ export default function Header({}) {
           {["left"].map((anchor) => (
             <React.Fragment key={anchor}>
               <Button onClick={toggleDrawer(anchor, true)}>
-                <MenuIcon color="disabled" fontSize="large"></MenuIcon>
+                <MenuIcon fontSize="large"></MenuIcon>
               </Button>
               <SwipeableDrawer
                 anchor={anchor}

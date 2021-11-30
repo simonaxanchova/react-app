@@ -1,10 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import DeleteIcon from "@mui/icons-material/Delete";
 
-import { Table, TableBody, Grid, Button, Hidden } from "@mui/material";
+import { Table, TableBody, Grid, Hidden, Link } from "@mui/material";
 import { UsersRepository } from "./UsersRepository";
 import { Address } from "./Address";
+import Box from "@mui/material/Box";
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
+import MenuIcon from "@mui/icons-material/Menu";
+import SettingsIcon from "@mui/icons-material/Settings";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { style } from "@mui/system";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export const UserDetails = ({}) => {
   const { id } = useParams();
@@ -30,52 +45,145 @@ export const UserDetails = ({}) => {
     UsersRepository.deleteUser(user?.id);
   };
 
+  const [state, setState] = React.useState({
+    right: false,
+  });
+
+  const toggleDrawer = (anchor, open) => (event) => {
+    if (
+      event &&
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    setState({ ...state, [anchor]: open });
+  };
+
+  const list = (anchor) => (
+    <Box
+      sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 250 }}
+      role="presentation"
+      onClick={toggleDrawer(anchor, false)}
+      onKeyDown={toggleDrawer(anchor, false)}
+    >
+      <List style={{ backgroundColor: "#F5F5F5", fontColor: "red" }}>
+        {["Edit user", "Delete user"].map((text, index) => (
+          <Link
+            to={
+              index === 0
+                ? `/users/update/${user?.id}`
+                : index === 1
+                ? `/users/delete/${user?.id}`
+                : ""
+            }
+            style={{ textDecoration: "none", color: "#0652DD" }}
+          >
+            <ListItem button key={text}>
+              <ListItemIcon>
+                {index === 0 ? (
+                  <EditIcon
+                    style={{ color: "#0652DD" }}
+                    onClick={() => {
+                      setRedirectTo(`/users/update/${user?.id}`);
+                    }}
+                  /> // BLUE
+                ) : index === 1 ? (
+                  <DeleteIcon
+                    style={{ color: "#ff3f34" }}
+                    onClick={() => {
+                      handleDelete();
+                      setRedirectTo(`/users`);
+                    }}
+                  /> // RED
+                ) : (
+                  ""
+                )}
+              </ListItemIcon>
+
+              <ListItemText
+                primary={text}
+                style={{ color: index === 0 ? "#0652DD" : "#ff3f34" }}
+              ></ListItemText>
+            </ListItem>
+          </Link>
+        ))}
+      </List>
+    </Box>
+  );
+
   return (
     <>
+      <Hidden mdUp={true}>
+        <Grid
+          style={{
+            textAlign: "right",
+            marginTop: "-40px",
+            marginRight: "-5px",
+          }}
+        >
+          {["right"].map((anchor) => (
+            <React.Fragment key={anchor}>
+              <Button onClick={toggleDrawer(anchor, true)}>
+                <SettingsIcon></SettingsIcon>
+              </Button>
+              <SwipeableDrawer
+                anchor={anchor}
+                open={state[anchor]}
+                onClose={toggleDrawer(anchor, false)}
+                onOpen={toggleDrawer(anchor, true)}
+              >
+                {list(anchor)}
+              </SwipeableDrawer>
+            </React.Fragment>
+          ))}
+        </Grid>
+      </Hidden>
+
       {redirectTo && <Navigate to={redirectTo} push />}
-      <Grid container spacing={2} style={{ marginTop: "20px" }}>
+      <Grid container spacing={2} style={{ marginTop: "-5px" }}>
         <Grid item xs={3} md={2}>
-          <Button
-            variant="outlined"
+          <ArrowBackIcon
             color="primary"
-            size="small"
+            variant="outlined"
             onClick={() => {
               setRedirectTo(`/users`);
             }}
-          >
-            <strong>Back</strong>
-          </Button>
+          />
         </Grid>
 
         <Hidden smDown>
           <Grid item xs={7}></Grid>
         </Hidden>
 
-        <Grid item xs={9} md={3} style={{ textAlign: "right" }}>
-          <Button
-            style={{ marginRight: "5px" }}
-            variant="outlined"
-            color="primary"
-            size="small"
-            onClick={() => {
-              setRedirectTo(`/users/update/${user?.id}`);
-            }}
-          >
-            <strong>Edit</strong>
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={() => {
-              handleDelete();
-              setRedirectTo(`/users`);
-            }}
-            startIcon={<DeleteIcon />}
-          >
-            <strong>Delete</strong>
-          </Button>
-        </Grid>
+        <Hidden smDown>
+          <Grid item xs={9} md={3} style={{ textAlign: "right" }}>
+            <Button
+              style={{ marginRight: "5px" }}
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={() => {
+                setRedirectTo(`/users/update/${user?.id}`);
+              }}
+            >
+              <strong>Edit</strong>
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={() => {
+                handleDelete();
+                setRedirectTo(`/users`);
+              }}
+              startIcon={<DeleteIcon />}
+            >
+              <strong>Delete</strong>
+            </Button>
+          </Grid>
+        </Hidden>
       </Grid>
 
       <Grid container spacing={2} style={{ marginTop: "20px" }}>
